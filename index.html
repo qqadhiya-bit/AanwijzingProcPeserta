@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aanwijzing - Dokumen Pemilihan (Peserta)</title>
+<style>
+    :root{
+        --bg-deep:#cfe8fb;
+        --bg-mid:#eef8ff;
+        --cyan:#0096c7;
+        --cyan-soft:rgba(0,150,199,0.35);
+        --accent-rgb:0,150,199;
+        --gold:#e8a93d;
+        --text-strong:#0f2544;
+        --text-dim:rgba(15,37,68,0.5);
+        --active-bg:rgba(232,169,61,.22);
+        --active-text:#6b4a06;
+        --hint-color:#c0392b;
+        --card-bg:rgba(255,255,255,.55);
+        --card-bg-solid:#fff;
+        --font-scale:1.25;
+        --video-box-width:1180px;
+        --video-box-height:79vh;
+        --qr-box-width:760px;
+        --transcript-font-scale:0.7;
+        --toc-base:520px;
+        --toc-bg:rgba(255,255,255,.30);
+        --toc-halo:transparent;
+    }
+    body.fit-screen-mode .main-layout{
+        flex:1; min-height:0; height:100%; margin-bottom:0; align-items:stretch;
+    }
+    body.fit-screen-mode .pdf-container,
+    body.fit-screen-mode .transcript-container{ height:100%; min-height:0; }
+    body.fit-screen-mode .pdf-container iframe{ height:100%; }
+    body.fit-screen-mode .pdf-fallback{ min-height:100%; }
+    *{box-sizing:border-box;}
+    body{
+        margin:0;
+        padding:30px 20px 40px;
+        background:radial-gradient(circle at center, var(--bg-mid) 0%, var(--bg-deep) 100%);
+        color:var(--text-strong);
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        min-height:100vh;
+        overflow-x:hidden;
+        position:relative;
+    }
+    body.fit-screen-mode{
+        height:100vh; height:100dvh; min-height:0; overflow:hidden;
+        padding:14px 20px;
+    }
+    .particles{
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        z-index:1; pointer-events:none;
+    }
+    .wrapper{
+        display:flex; flex-direction:column; align-items:center;
+        max-width:1200px; width:100%; z-index:2;
+    }
+    body.fit-screen-mode .wrapper{
+        flex:1; min-height:0;
+    }
+    .top-bar{
+        display:flex; justify-content:space-between; align-items:center;
+        width:100%; margin-bottom:20px; gap:12px; flex-wrap:wrap;
+    }
+    body.fit-screen-mode .top-bar{ flex-shrink:0; margin-bottom:12px; }
+    .title-block h1{
+        font-size:calc(28px * var(--font-scale)); margin:0 0 4px; font-weight:700; letter-spacing:0.2px;
+        color:var(--text-strong);
+    }
+    .title-block span{
+        font-size:calc(15px * var(--font-scale)); color:var(--text-dim);
+    }
+    .fullscreen-btn{
+        background:var(--card-bg);
+        border:1px solid var(--cyan-soft);
+        color:var(--text-strong); padding:9px 18px; border-radius:30px;
+        font-size:13px; font-weight:600; cursor:pointer;
+        transition:all .3s ease;
+    }
+    .fullscreen-btn:hover{
+        background:var(--cyan); color:#fff;
+        box-shadow:0 0 15px rgba(var(--accent-rgb),.4);
+    }
+
+    /* ===== Layout KAK & IKP: dokumen utama berdampingan dengan ringkasan ===== */
+    .main-layout{
+        position:relative;
+        display:grid;
+        grid-template-columns:minmax(0, 1fr) minmax(360px, var(--toc-base));
+        align-items:start; gap:20px;
+        width:100%; margin-bottom:30px;
+    }
+    .pdf-container{
+        position:relative;
+        background:var(--card-bg-solid); border-radius:12px; padding:8px;
+        box-shadow:0 20px 50px rgba(15,37,68,.18), 0 0 30px rgba(var(--accent-rgb),.15);
+        overflow:hidden;
+    }
+    .pdf-container iframe{
+        width:100%; height:86vh; border:none; border-radius:6px; display:block;
+    }
+    .pdf-fallback{
+        display:none; align-items:center; justify-content:center;
+        min-height:86vh; color:#333; font-size:14px; text-align:center; padding:20px;
+    }
+    .transcript-container{
+        position:relative; min-width:0; width:100%; height:74vh;
+        background:var(--toc-bg);
+        border:1px solid var(--cyan-soft);
+        border-radius:12px; padding:20px;
+        display:flex; flex-direction:column; gap:16px;
+        overflow-y:auto;
+        backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+        box-shadow:0 8px 28px rgba(15,37,68,.12);
+    }
+    .transcript-container::-webkit-scrollbar{ width:6px; }
+    .transcript-container::-webkit-scrollbar-thumb{ background:var(--cyan-soft); border-radius:6px; }
+
+    .transcript-header{
+        display:flex; align-items:center; justify-content:flex-end; gap:6px;
+        flex-shrink:0; margin-bottom:-6px;
+    }
+    .transcript-header .resize-btn{ width:26px; height:26px; font-size:14px; }
+
+    .transcript-line{
+        font-size:calc(17px * var(--transcript-font-scale)); line-height:1.6; color:var(--text-dim);
+        transition:all .35s ease; padding:12px 14px; border-radius:8px;
+        border-left:4px solid transparent;
+        cursor:pointer;
+    }
+    .transcript-line:hover{
+        background:rgba(var(--accent-rgb),.08);
+    }
+    .transcript-line strong{ color:inherit; }
+    .transcript-line.active{
+        color:var(--active-text);
+        background:var(--active-bg);
+        border-left:4px solid var(--gold);
+        transform:translateX(2px);
+    }
+    .transcript-line.done{ color:rgba(15,37,68,.4); }
+
+    .toc-title{
+        font-size:calc(19px * var(--transcript-font-scale)); line-height:1.5;
+        color:var(--text-strong); font-weight:800;
+        text-align:justify; margin:0 0 16px; padding:10px 8px;
+        border-radius:8px; cursor:pointer; transition:color .15s ease, background .15s ease;
+        border-bottom:2px solid var(--cyan-soft);
+    }
+    .toc-title:hover, .toc-title.tts-speaking{
+        color:var(--cyan);
+        background:rgba(var(--accent-rgb),.08);
+    }
+    .toc-section{
+        font-size:calc(17px * var(--transcript-font-scale)); line-height:1.55;
+        color:var(--text-strong); font-weight:700;
+        text-align:justify; margin:14px 0 2px; padding:4px 4px;
+        border-radius:6px; cursor:pointer; transition:color .15s ease, background .15s ease;
+    }
+    .toc-section:first-child{ margin-top:0; }
+    .toc-sub{
+        font-size:calc(16px * var(--transcript-font-scale)); line-height:1.55;
+        color:var(--text-dim); font-weight:500;
+        text-align:justify; margin:2px 0 2px 22px; padding:2px 4px;
+        border-radius:6px; cursor:pointer; transition:color .15s ease, background .15s ease;
+    }
+    .toc-subsub{
+        font-size:calc(15px * var(--transcript-font-scale)); line-height:1.55;
+        color:var(--text-dim); font-weight:400;
+        text-align:justify; margin:2px 0 2px 44px; padding:2px 4px;
+        border-radius:6px; cursor:pointer; transition:color .15s ease, background .15s ease;
+    }
+    /* Penanda visual: teks yang sedang di-hover / dibacakan otomatis */
+    .toc-section:hover, .toc-sub:hover, .toc-subsub:hover,
+    .toc-section.tts-speaking, .toc-sub.tts-speaking, .toc-subsub.tts-speaking{
+        color:var(--cyan);
+        background:rgba(var(--accent-rgb),.08);
+    }
+    .toc-title.tts-speaking, .toc-section.tts-speaking, .toc-sub.tts-speaking, .toc-subsub.tts-speaking{
+        border-left:3px solid var(--cyan);
+        box-shadow:-2px 0 10px -2px var(--cyan), inset 0 0 0 rgba(0,0,0,0);
+        padding-left:12px;
+        animation:neon-pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes neon-pulse{
+        0%, 100% { box-shadow:-2px 0 8px -2px var(--cyan); }
+        50% { box-shadow:-2px 0 16px 1px var(--cyan); }
+    }
+
+    .voice-panel{ flex-shrink:0; border:0; background:transparent; }
+    .voice-panel .voice-panel-toggle, .voice-panel .voice-seek-hint{ display:none !important; }
+    .voice-panel .voice-panel-body{ display:flex !important; padding:0; }
+    .voice-panel.expanded{
+        background:rgba(255,255,255,.42);
+        box-shadow:0 5px 16px rgba(15,37,68,.08);
+    }
+    .voice-panel-toggle{
+        width:100%; min-height:38px; padding:8px 11px; border:0;
+        display:flex; align-items:center; justify-content:space-between; gap:10px;
+        color:var(--text-strong); background:transparent; cursor:pointer; text-align:left;
+    }
+    .voice-panel-toggle:hover{ background:rgba(var(--accent-rgb),.06); }
+    .voice-panel-label{ font-size:12px; font-weight:700; }
+    .voice-panel-summary{
+        min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+        color:var(--text-dim); font-size:11px;
+    }
+    .voice-panel-chevron{ flex-shrink:0; font-size:14px; transition:transform .2s ease; }
+    .voice-panel.expanded .voice-panel-chevron{ transform:rotate(180deg); }
+    .voice-panel-body{
+        display:none; padding:0 12px 11px; flex-direction:column; gap:8px;
+    }
+    .voice-panel.expanded .voice-panel-body{ display:flex; }
+    .voice-controls{ display:flex; align-items:center; gap:9px; min-width:0; }
+    .voice-play-btn{
+        width:32px; height:32px; flex-shrink:0; border:1px solid var(--cyan-soft);
+        border-radius:50%; background:rgba(255,255,255,.12); color:var(--text-strong);
+        font-size:13px; cursor:pointer;
+    }
+    .voice-play-btn:hover{ background:var(--cyan); color:#fff; }
+    .voice-speed{
+        flex-shrink:0; padding:5px 7px; border:1px solid rgba(15,37,68,.15);
+        border-radius:8px; background:rgba(255,255,255,.12); color:var(--text-strong);
+        font-size:11px;
+    }
+    .voice-seek-meta{
+        display:flex; align-items:center; justify-content:space-between; gap:12px;
+        min-width:0; font-size:12px; color:var(--text-dim);
+    }
+    .voice-seek-count{ flex-shrink:0; font-family:monospace; }
+    .voice-seek-title{
+        overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+        color:var(--text-strong); font-weight:600;
+    }
+    .voice-seek-slider{
+        width:100%; height:4px; margin:2px 0; border-radius:99px;
+        background:rgba(15,37,68,.16); cursor:pointer; accent-color:var(--cyan);
+        opacity:.62;
+    }
+    .voice-seek-slider:hover, .voice-seek-slider:focus-visible{ opacity:1; }
+    .voice-seek-slider::-webkit-slider-thumb{
+        width:13px; height:13px; border:2px solid rgba(255,255,255,.85);
+        border-radius:50%; background:var(--cyan); box-shadow:0 1px 5px rgba(15,37,68,.25);
+        -webkit-appearance:none; appearance:none;
+    }
+    .voice-seek-slider::-moz-range-thumb{
+        width:10px; height:10px; border:2px solid rgba(255,255,255,.85);
+        border-radius:50%; background:var(--cyan); box-shadow:0 1px 5px rgba(15,37,68,.25);
+    }
+    .voice-seek-hint{ font-size:11px; color:var(--text-dim); line-height:1.35; }
+
+    .theme-picker{
+        display:flex; align-items:center; gap:8px;
+        background:var(--card-bg);
+        border:1px solid rgba(255,255,255,.15);
+        padding:6px 10px; border-radius:30px;
+        backdrop-filter:blur(8px);
+    }
+    .theme-picker span{ font-size:11px; color:var(--text-dim); margin-right:2px; white-space:nowrap; }
+    .theme-swatch{
+        width:20px; height:20px; border-radius:50%; cursor:pointer;
+        border:2px solid rgba(255,255,255,.9);
+        box-shadow:0 1px 4px rgba(15,37,68,.25);
+        transition:transform .15s ease;
+        padding:0; flex-shrink:0;
+    }
+    .theme-swatch.swatch-white{ border-color:#c3c9d1; }
+    .theme-swatch:hover{ transform:scale(1.15); }
+    .theme-swatch.selected{ border-color:var(--text-strong); }
+    .mode-toggle{ display:flex; gap:3px; margin-right:4px; }
+    .mode-btn{
+        width:22px; height:22px; border-radius:50%; border:1px solid rgba(15,37,68,.15);
+        background:rgba(255,255,255,.6); cursor:pointer; font-size:11px;
+        display:flex; align-items:center; justify-content:center; padding:0;
+    }
+    .mode-btn.active{ background:var(--cyan); box-shadow:0 0 6px rgba(var(--accent-rgb),.5); }
+    .theme-custom-wrap{
+        width:20px; height:20px; border-radius:50%; overflow:hidden;
+        border:2px solid rgba(255,255,255,.9); cursor:pointer; flex-shrink:0;
+        background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);
+    }
+    .theme-custom-wrap input[type="color"]{
+        width:150%; height:150%; margin:-25%; border:none; cursor:pointer; padding:0;
+    }
+
+    .font-picker{
+        display:flex; align-items:flex-end; gap:6px;
+        background:var(--card-bg);
+        border:1px solid rgba(255,255,255,.15);
+        padding:6px 10px; border-radius:30px;
+        backdrop-filter:blur(8px);
+    }
+    .font-picker span{ font-size:11px; color:var(--text-dim); margin-right:2px; white-space:nowrap; align-self:center; }
+    .font-size-btn{
+        min-width:24px; height:26px; padding:0 4px; border-radius:6px;
+        border:1px solid rgba(15,37,68,.15); background:rgba(255,255,255,.6);
+        color:var(--text-strong); font-weight:700; cursor:pointer;
+        display:flex; align-items:flex-end; justify-content:center;
+        line-height:1; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .font-size-btn.active{ background:var(--cyan); color:#fff; border-color:var(--cyan); }
+
+    .page{ display:none; width:100%; flex-direction:column; align-items:center; }
+    .page.active{ display:flex; }
+    body.fit-screen-mode .page.active{ flex:1; min-height:0; overflow:hidden; }
+
+    .video-page-row{
+        display:flex; align-items:center; justify-content:center; gap:14px; width:100%;
+    }
+    .video-intro-box{
+        background:var(--card-bg-solid); border-radius:16px; padding:10px;
+        box-shadow:0 20px 50px rgba(15,37,68,.18), 0 0 30px rgba(var(--accent-rgb),.15);
+        width:100%; max-width:var(--video-box-width); overflow:hidden;
+        display:flex; align-items:center; justify-content:center;
+        position:relative; z-index:501;
+    }
+    .video-intro-box video{
+        width:100%; max-height:var(--video-box-height); display:block; border-radius:10px; background:#000;
+    }
+    .video-fallback{
+        display:none; align-items:center; justify-content:center; flex-direction:column; gap:10px;
+        width:100%; min-height:var(--video-box-height); color:#333; font-size:14px; text-align:center; padding:20px;
+    }
+    .video-fallback .big-icon{ font-size:40px; }
+
+    .box-resize-controls{
+        display:flex; flex-direction:column; gap:8px; flex-shrink:0;
+    }
+    .resize-btn{
+        width:34px; height:34px; border-radius:50%;
+        background:var(--card-bg); border:1px solid var(--cyan-soft);
+        color:var(--text-strong); font-size:18px; font-weight:700; cursor:pointer;
+        display:flex; align-items:center; justify-content:center;
+        transition:all .2s ease;
+    }
+    .resize-btn:hover{ background:var(--cyan); color:#fff; }
+
+    /* Mode Layar Penuh (tombol umum ⛶): cuma cegah scroll, TIDAK menyentuh
+       kotak video sama sekali — video punya animasi cinema sendiri yang
+       hanya terpicu saat video benar-benar diputar (lihat JS: cinema-active). */
+    body.is-fullscreen{ overflow:hidden; }
+
+    .qr-page-row{
+        display:flex; align-items:center; justify-content:center; gap:14px; width:100%;
+    }
+    .qr-box{
+        background:var(--card-bg-solid); border-radius:16px; padding:40px 48px;
+        box-shadow:0 20px 50px rgba(15,37,68,.18), 0 0 30px rgba(var(--accent-rgb),.15);
+        width:100%; max-width:var(--qr-box-width); overflow:hidden;
+        display:flex; flex-direction:column; align-items:center; gap:18px;
+        text-align:center;
+    }
+    .qr-box h2{ margin:0; font-size:calc(26px * var(--font-scale)); color:var(--text-strong); }
+    .qr-box p{ margin:0; font-size:calc(15px * var(--font-scale)); color:var(--text-dim); max-width:560px; }
+    .qr-box img{ width:100%; max-width:460px; height:auto; display:block; border-radius:10px; }
+    .qr-fallback{
+        display:none; align-items:center; justify-content:center; flex-direction:column; gap:8px;
+        width:100%; max-width:460px; min-height:260px; color:#333; font-size:13px; text-align:center; padding:16px;
+        border:1px dashed rgba(15,37,68,.2); border-radius:10px;
+    }
+    .qr-fallback .big-icon{ font-size:32px; }
+
+    .nav-btn{
+        position:fixed; bottom:24px; z-index:10001;
+        width:52px; height:52px; border-radius:50%;
+        background:var(--card-bg); border:1px solid var(--cyan-soft);
+        color:var(--text-strong); font-size:22px; font-weight:700;
+        display:flex; align-items:center; justify-content:center;
+        cursor:pointer; backdrop-filter:blur(8px);
+        box-shadow:0 8px 24px rgba(15,37,68,.2);
+        transition:all .2s ease;
+    }
+    .nav-btn:hover{ background:var(--cyan); color:#fff; transform:scale(1.08); }
+    .nav-prev{ left:24px; }
+
+    .clock-badge{
+        position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+        z-index:10001; display:flex; align-items:center; gap:6px;
+        background:rgba(255,255,255,.18); color:rgba(255,255,255,.95); padding:5px 14px;
+        border-radius:20px; font-family:monospace; font-size:11px; font-weight:600;
+        letter-spacing:.4px; backdrop-filter:blur(14px) saturate(160%);
+        -webkit-backdrop-filter:blur(14px) saturate(160%);
+        border:1px solid rgba(255,255,255,.35);
+        box-shadow:0 4px 14px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.3);
+    }
+    .stopwatch-badge{
+        position:fixed; top:16px; left:50%; transform:translateX(-50%);
+        z-index:10001; display:flex; align-items:center; gap:8px;
+        background:rgba(15,37,68,.85); color:#fff; padding:6px 14px;
+        border-radius:20px; font-family:monospace; font-size:13px; font-weight:600;
+        letter-spacing:.5px; backdrop-filter:blur(6px);
+        box-shadow:0 4px 14px rgba(15,37,68,.3);
+        cursor:pointer; transition:transform .15s ease;
+    }
+    .stopwatch-badge:hover{ transform:translateX(-50%) scale(1.05); }
+    .stopwatch-dot{
+        width:8px; height:8px; border-radius:50%; background:#ff4d4d;
+        animation:stopwatch-blink 1.2s ease-in-out infinite;
+    }
+    @keyframes stopwatch-blink{
+        0%, 100% { opacity:1; } 50% { opacity:.25; }
+    }
+    .stopwatch-badge.done{ background:rgba(20,120,80,.9); }
+    .stopwatch-badge.done .stopwatch-dot{
+        background:#4ade80; animation:none; opacity:1;
+    }
+
+    .ambient-dim{
+        position:fixed; inset:0; background:rgba(0,0,0,0); pointer-events:none;
+        z-index:500; transition:background 1.4s ease;
+    }
+    .ambient-dim.active{ background:rgba(0,0,0,.72); }
+    body.is-fullscreen .ambient-dim{ display:none; } /* di fullscreen video udah penuh layar, nggak perlu dim */
+
+    /* Mode "bioskop" pas video diputar — kotak video membesar penuh layar
+       lewat animasi FLIP di JS (bukan fullscreen API bawaan), makanya
+       cukup diberi state akhir di sini; transisinya diatur lewat JS. */
+    .video-intro-box.cinema-active{
+        position:fixed; inset:0; width:100vw; height:100vh; max-width:100vw;
+        border-radius:0; padding:0; box-shadow:none; z-index:9999; background:#000;
+    }
+    .video-intro-box.cinema-active video{
+        width:100vw; height:100vh; max-width:100vw; max-height:100vh;
+        object-fit:contain; border-radius:0;
+    }
+    body.video-cinema-mode .box-resize-controls{ display:none; }
+
+    /* Staggered text reveal — elemen muncul satu-satu beruntun, dengan efek "fokus masuk" halus */
+    @keyframes stagger-fade-in{
+        from { opacity:0; transform:translateY(12px); filter:blur(4px); }
+        to   { opacity:1; transform:translateY(0);    filter:blur(0); }
+    }
+    .stagger-in{ animation:stagger-fade-in .5s cubic-bezier(.22,1,.36,1) both; }
+
+    /* Fluid transition antar-halaman (View Transitions API, browser modern) —
+       soft zoom + fade, bukan crossfade polos */
+    @keyframes page-soft-out{
+        from { opacity:1; transform:scale(1); }
+        to   { opacity:0; transform:scale(.97); }
+    }
+    @keyframes page-soft-in{
+        from { opacity:0; transform:scale(1.03); }
+        to   { opacity:1; transform:scale(1); }
+    }
+    ::view-transition-old(root){
+        animation:.45s cubic-bezier(.4,0,.2,1) both page-soft-out;
+    }
+    ::view-transition-new(root){
+        animation:.5s cubic-bezier(.22,1,.36,1) both page-soft-in;
+    }
+    .nav-next{ right:24px; }
+
+    .doclist-box{
+        background:var(--card-bg); border-radius:16px; padding:24px;
+        -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+        border:1px solid rgba(255,255,255,.75);
+        box-shadow:0 8px 28px rgba(15,37,68,.10);
+        width:100%; max-width:800px;
+        flex:1 1 auto; min-width:0;
+    }
+    body.fit-screen-mode .page2-row,
+    body.fit-screen-mode .doclist-box{ max-width:none; }
+    body.fit-screen-mode .page2-row{ flex:1; min-height:0; }
+    body.fit-screen-mode .doclist-box{ display:flex; flex-direction:column; min-height:0; }
+    .doclist-box h2{
+        margin:0 0 16px; font-size:calc(22px * var(--font-scale)); color:var(--text-strong);
+    }
+    .doclist-scroll{
+        max-height:60vh; overflow-y:auto; border:1px solid rgba(15,37,68,.1);
+        border-radius:10px; padding:4px 0;
+    }
+    body.fit-screen-mode .doclist-scroll{ flex:1; min-height:0; max-height:none; }
+    .doclist-scroll::-webkit-scrollbar{ width:6px; }
+    .doclist-scroll::-webkit-scrollbar-thumb{ background:var(--cyan-soft); border-radius:6px; }
+
+    /* HALAMAN 2: layout 2 kolom — daftar dokumen + kotak QR eye-catching */
+    .page2-row{
+        display:flex; align-items:stretch; justify-content:center; gap:24px;
+        width:100%; max-width:1200px;
+    }
+    @media (max-width:900px){ .page2-row{ flex-direction:column; align-items:center; } }
+
+    .qr-side-box{
+        position:relative; overflow:hidden;
+        background:var(--card-bg);
+        -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+        border:1px solid rgba(255,255,255,.75);
+        border-radius:18px; padding:26px 22px;
+        width:100%; max-width:280px; flex-shrink:0;
+        display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;
+        box-shadow:0 8px 28px rgba(15,37,68,.10);
+    }
+    .qr-side-glow{
+        position:absolute; top:-40%; left:-20%; width:160%; height:160%;
+        background:radial-gradient(circle, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 60%);
+        animation:none; opacity:0; display:none; pointer-events:none;
+    }
+    @keyframes qr-glow-pulse{
+        0%, 100% { opacity:.5; transform:scale(1); }
+        50% { opacity:1; transform:scale(1.15); }
+    }
+    .qr-side-icon{ font-size:34px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.2)); z-index:1; }
+    .qr-side-box h3{
+        margin:0; font-size:calc(17px * var(--font-scale)); color:var(--text-strong); font-weight:800;
+        z-index:1;
+    }
+    .qr-side-box p{
+        margin:0; font-size:calc(12px * var(--font-scale)); color:var(--text-dim);
+        line-height:1.4; z-index:1;
+    }
+    .qr-side-imgwrap{
+        background:#fff; border-radius:12px; padding:10px; width:100%;
+        box-shadow:0 4px 14px rgba(15,37,68,.12); z-index:1;
+    }
+    .qr-side-imgwrap img{ width:100%; height:auto; display:block; border-radius:6px; }
+    .qr-side-imgwrap .qr-fallback{
+        max-width:none; min-height:160px; margin:0; border:none; padding:8px;
+    }
+    .doclist-item{
+        display:flex; align-items:center; gap:12px;
+        padding:12px 18px; border-bottom:1px solid rgba(15,37,68,.06);
+        color:var(--text-strong);
+    }
+    .doclist-item.last-doc-item{ border-bottom:none; }
+    .doclist-item .doc-num{ font-size:calc(13px * var(--font-scale)); color:var(--text-dim); width:18px; flex-shrink:0; }
+    .doclist-item .doc-badge{
+        font-size:10px; font-weight:700; color:#fff; padding:2px 6px; border-radius:4px;
+        flex-shrink:0; letter-spacing:.3px;
+    }
+    .doclist-item .doc-badge.pdf{ background:rgba(15,37,68,.08); color:var(--text-strong); }
+    .doclist-item .doc-name{ flex-grow:1; font-size:calc(15px * var(--font-scale)); }
+    .doclist-item a.doc-view{
+        font-size:calc(13px * var(--font-scale)); font-weight:600; color:var(--cyan);
+        text-decoration:underline; flex-shrink:0; cursor:pointer;
+    }
+    .doclist-item a.doc-view:hover{ opacity:.7; }
+
+    .pdf-view-box{
+        background:var(--card-bg-solid); border-radius:16px; padding:16px;
+        box-shadow:0 20px 50px rgba(15,37,68,.18), 0 0 30px rgba(var(--accent-rgb),.15);
+        width:100%; max-width:1300px;
+        display:flex; flex-direction:column; gap:10px;
+    }
+    .pdf-view-box h2{ margin:0; font-size:calc(18px * var(--font-scale)); color:var(--text-strong); padding:0 6px; }
+    .pdf-view-box iframe{ width:100%; height:85vh; border:none; border-radius:10px; display:block; }
+    .pdf-iframe-pool{ width:100%; height:85vh; position:relative; }
+    .pdf-iframe-pool iframe{
+        position:absolute; inset:0; width:100%; height:100%;
+        border:none; border-radius:10px; display:none;
+    }
+    .pdf-iframe-pool iframe.active{ display:block; }
+    body.fit-screen-mode .pdf-view-box{
+        flex:1; min-height:0; max-width:none;
+    }
+    body.fit-screen-mode .pdf-iframe-pool{
+        flex:1; min-height:0; height:auto;
+    }
+
+    /* ===== RINGKASAN (versi peserta) ===== */
+    .nav-prev{ left:24px; }
+    .transcript-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .sum-label{ font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim); }
+    .sum-btns{ display:flex; gap:8px; }
+    .sum-doc-title{ margin:0; font-size:14px; font-weight:800; color:var(--text-strong); line-height:1.35;
+        padding-bottom:10px; border-bottom:2px solid var(--cyan-soft); }
+    .sum-list{ display:flex; flex-direction:column; gap:4px; }
+    .sum-item{ padding:8px 10px; border-radius:10px; cursor:pointer; border-left:3px solid transparent;
+        transition:background .2s ease, border-color .2s ease; }
+    .sum-item:hover{ background:rgba(var(--accent-rgb),.08); }
+    .sum-item.current{ background:rgba(var(--accent-rgb),.12); border-left-color:var(--cyan); }
+    .sum-title{ font-weight:700; color:var(--text-strong); font-size:13.5px; line-height:1.35; }
+    .sum-bab{ margin-top:10px; }
+    .sum-bab .sum-title{ font-size:14px; font-weight:800; }
+    .sum-sub{ margin-left:10px; }
+    .sum-subsub{ margin-left:22px; }
+    .sum-subsub .sum-title{ font-weight:600; font-size:13px; }
+    .sum-text{
+        margin:3px 0 0; font-size:11.5px; line-height:1.4;
+        color:var(--text-strong); opacity:.82; text-align:justify; text-align-last:left;
+        overflow-wrap:anywhere;
+    }
+    .wrapper.detail-layout{ max-width:1800px; }
+    @media (max-width:900px){
+        .main-layout{ grid-template-columns:minmax(0, 1.15fr) minmax(0, .85fr); gap:10px; }
+        .transcript-container{ padding:12px; }
+        .sum-item{ padding:6px 7px; }
+        .sum-sub{ margin-left:5px; }
+        .sum-subsub{ margin-left:10px; }
+        body.fit-screen-mode .page2-row{ flex-direction:row; align-items:stretch; gap:10px; }
+        body.fit-screen-mode .doclist-box{ padding:12px; }
+        body.fit-screen-mode .doclist-box h2{ margin-bottom:8px; }
+        body.fit-screen-mode .doclist-item{ gap:6px; padding:8px 5px; }
+        body.fit-screen-mode .doclist-item .doc-name{ font-size:calc(13px * var(--font-scale)); }
+        body.fit-screen-mode .qr-side-box{ width:32%; max-width:none; padding:12px 8px; gap:6px; }
+        body.fit-screen-mode .qr-side-icon{ font-size:24px; }
+        body.fit-screen-mode .qr-side-box p{ font-size:calc(10px * var(--font-scale)); }
+        body.fit-screen-mode .qr-side-imgwrap{ max-width:140px; padding:6px; }
+        body.fit-screen-mode .qr-side-imgwrap .qr-fallback{ min-height:0; }
+    }
+    #navNext{ display:none !important; }
+</style>
+</head>
+<body class="fit-screen-mode">
+
+<canvas class="particles" id="particleCanvas"></canvas>
+
+<div class="wrapper">
+    <div class="top-bar">
+        <div class="title-block">
+            <h1>AANWIJZING</h1>
+            <span>PENGADAAN JASA PENYEDIAAN PERALATAN FASILITAS KEAMANAN PENERBANGAN DI LINGKUNGAN PT INTEGRASI AVIASI SOLUSI</span>
+        </div>
+        <div class="font-picker" id="fontPicker">
+            <span></span>
+            <button class="font-size-btn" style="font-size:11px;" data-scale="0.85" onclick="setFontScale(0.85, this)" title="Kecil">A</button>
+            <button class="font-size-btn" style="font-size:15px;" data-scale="1" onclick="setFontScale(1, this)" title="Sedang">A</button>
+            <button class="font-size-btn active" style="font-size:19px;" data-scale="1.25" onclick="setFontScale(1.25, this)" title="Besar">A</button>
+            <button class="font-size-btn" style="font-size:24px;" data-scale="1.5" onclick="setFontScale(1.5, this)" title="Sangat besar">A</button>
+        </div>
+        <div class="theme-picker" id="themePicker">
+            <div class="mode-toggle">
+                <button class="mode-btn active" id="modeLight" onclick="setThemeMode('light')" title="Mode Terang">☼</button>
+                <button class="mode-btn" id="modeDark" onclick="setThemeMode('dark')" title="Mode Gelap">☾</button>
+            </div>
+            <span></span>
+            <button class="theme-swatch swatch-white selected" data-color="#ffffff" style="background:#ffffff" title="Putih (Gelap = Hitam)" onclick="applyThemeFromAccent('#ffffff', this)"></button>
+            <button class="theme-swatch" data-color="#64748b" style="background:#64748b" title="Abu Slate" onclick="applyThemeFromAccent('#64748b', this)"></button>
+            <button class="theme-swatch" data-color="#a8324a" style="background:#a8324a" title="Merah Mawar" onclick="applyThemeFromAccent('#a8324a', this)"></button>
+            <button class="theme-swatch" data-color="#e07a5f" style="background:#e07a5f" title="Terakota Peach" onclick="applyThemeFromAccent('#e07a5f', this)"></button>
+            <button class="theme-swatch" data-color="#d9a521" style="background:#d9a521" title="Kuning Madu" onclick="applyThemeFromAccent('#d9a521', this)"></button>
+            <button class="theme-swatch" data-color="#5f9f7a" style="background:#5f9f7a" title="Hijau Sage" onclick="applyThemeFromAccent('#5f9f7a', this)"></button>
+            <button class="theme-swatch" data-color="#2a9d8f" style="background:#2a9d8f" title="Hijau Tosca" onclick="applyThemeFromAccent('#2a9d8f', this)"></button>
+            <button class="theme-swatch" data-color="#3a8fd6" style="background:#3a8fd6" title="Biru Langit" onclick="applyThemeFromAccent('#3a8fd6', this)"></button>
+            <button class="theme-swatch" data-color="#1f3f94" style="background:#1f3f94" title="Biru Navy" onclick="applyThemeFromAccent('#1f3f94', this)"></button>
+            <button class="theme-swatch" data-color="#7c6fc4" style="background:#7c6fc4" title="Ungu Lavender" onclick="applyThemeFromAccent('#7c6fc4', this)"></button>
+            <label class="theme-custom-wrap" title="Warna kustom">
+                <input type="color" id="customColorInput" value="#ffffff" oninput="applyThemeFromAccent(this.value, null)">
+            </label>
+        </div>
+        <button class="fullscreen-btn" onclick="toggleFullScreen()" id="fsBtn">⛶</button>
+    </div>
+
+    <!-- TAMPILAN DETAIL: SURAT IKP + TRANSKRIP + AUDIO (dibuka lewat klik "view" pada dokumen IKP) -->
+    <div class="page" id="ikpView">
+        <div class="main-layout">
+            <!-- KOLOM KIRI: PDF ASLI -->
+            <div class="pdf-container" id="pdfContainer">
+                <iframe src="about:blank" id="pdfFrame" title="Dokumen Pengadaan"
+                        onerror="showPdfFallback()"></iframe>
+                <div class="pdf-fallback" id="pdfFallback">
+                    File "surat.pdf" tidak ditemukan di folder ini.<br>Letakkan surat.pdf di folder yang sama dengan index.html.
+                </div>
+            </div>
+            <!-- KOLOM KANAN: DAFTAR ISI IKP DAN PEMBACA SUARA PER BAB/SUBBAB -->
+            <div class="transcript-container" id="transcriptContainer">
+                <div class="transcript-header">
+                    <span class="sum-label">Ringkasan</span>
+                    <span class="sum-btns">
+                    <button class="resize-btn" onclick="adjustTocWidth(40)" title="Lebarkan kotak">+</button>
+                    <button class="resize-btn" onclick="adjustTocWidth(-40)" title="Persempit kotak">−</button>
+                    </span>
+                </div>
+                <p class="sum-doc-title">Instruksi Kepada Peserta (IKP)</p>
+                <div class="sum-list" id="sumListIkp"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TAMPILAN DETAIL: KAK (RKST) + DAFTAR ISI + BACA OTOMATIS (dibuka lewat klik "view" pada dokumen KAK) -->
+    <div class="page" id="kakView">
+        <div class="main-layout">
+            <!-- KOLOM KIRI: PDF ASLI -->
+            <div class="pdf-container" id="pdfContainerKak">
+                <iframe src="about:blank" id="pdfFrameKak" title="Kerangka Acuan Kerja"
+                        onerror="showPdfFallbackKak()"></iframe>
+                <div class="pdf-fallback" id="pdfFallbackKak">
+                    File "kak.pdf" tidak ditemukan di folder ini.<br>Letakkan kak.pdf di folder yang sama dengan index.html.
+                </div>
+            </div>
+            <!-- KOLOM KANAN: DAFTAR ISI KAK (klik bagian -> baca otomatis) -->
+            <div class="transcript-container" id="transcriptContainerKak">
+                <div class="transcript-header">
+                    <span class="sum-label">Ringkasan</span>
+                    <span class="sum-btns">
+                    <button class="resize-btn" onclick="adjustTocWidth(40)" title="Lebarkan kotak">+</button>
+                    <button class="resize-btn" onclick="adjustTocWidth(-40)" title="Persempit kotak">−</button>
+                    </span>
+                </div>
+                <p class="sum-doc-title">Kerangka Acuan Kerja (KAK)</p>
+                <div class="sum-list" id="sumListKak"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- HALAMAN 2: DAFTAR DOKUMEN PEMILIHAN -->
+    <div class="page active" id="page2">
+        <div class="page2-row">
+            <div class="doclist-box">
+                <h2>Dokumen Pemilihan</h2>
+                <div class="doclist-scroll" id="doclistScroll"></div>
+            </div>
+
+            <div class="qr-side-box">
+                <div class="qr-side-glow"></div>
+                <div class="qr-side-icon">📱</div>
+                <h3>Scan</h3>
+                <p>Download Template Dokumen<br>Pengadaan Jasa Penyediaan Peralatan Fasilitas Keamanan Penerbangan di Lingkungan PT Integrasi Aviasi Solusi:</p>
+                <div class="qr-side-imgwrap">
+                    <img src="qr-dokumen.png" alt="QR Akses Dokumen" id="qrDokumenImg" onerror="showQrDokumenFallback()">
+                    <div class="qr-fallback" id="qrDokumenFallback">
+                        <div class="big-icon">📱</div>
+                        File <strong>qr-dokumen.png</strong> belum ditemukan.<br>
+                        Taruh gambar QR di folder ini dengan nama persis <strong>qr-dokumen.png</strong>.
+                    </div>
+                </div>
+                <p class="qr-side-fallback">bit.ly/dokumen-aanwijzing</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAMPILAN DETAIL: FULL VIEW SATU DOKUMEN PDF -->
+    <div class="page" id="pdfView">
+        <div class="pdf-view-box">
+            <h2 id="pdfViewTitle">Dokumen</h2>
+            <div class="pdf-iframe-pool" id="pdfIframePool"></div>
+            <div class="pdf-fallback" id="pdfViewFallback">
+                File dokumen ini tidak ditemukan di folder, atau gagal dibuka. Pastikan nama filenya sama persis.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOMBOL NAVIGASI ANTAR HALAMAN (pojok bawah) -->
+<div class="clock-badge" id="clockBadge"><span id="clockTime">--:--</span> WIB</div>
+
+
+<button class="nav-btn nav-prev" id="navPrev" onclick="handlePrevClick()" title="Halaman sebelumnya" style="display:none;">&lt;</button>
+
+<!-- audio.mp3 sudah tidak dipakai — pembacaan sekarang pakai text-to-speech browser (lihat script di bawah) -->
+
+<script>
+/* ============================================================
+   0a) NAVIGASI HALAMAN (alur panah: 3 halaman)
+   ============================================================
+   page1 = video intro, page2 = daftar dokumen, page3 = QR feedback.
+   "ikpView" dan "pdfView" adalah tampilan detail yang dibuka
+   lewat klik "view" pada dokumen tertentu — bukan bagian dari
+   alur panah < >, makanya dikeluarkan dari hitungan TOTAL_PAGES.
+*/
+const TOTAL_PAGES = 3;
+let currentPage = 2;
+let inDetailView = false;
+
+/* Bungkus perpindahan halaman pakai View Transitions API browser modern
+   (efek morph/fade halus antar-halaman). Browser yang belum dukung
+   otomatis langsung pindah biasa tanpa animasi tambahan — tetap jalan
+   normal, cuma nggak ada efeknya. */
+function performPageSwitch(mutateFn){
+    if(document.startViewTransition){
+        document.startViewTransition(()=>{
+            mutateFn();
+            staggerActivePage();
+        });
+    } else {
+        mutateFn();
+        staggerActivePage();
+    }
+}
+
+/* Efek "staggered": elemen teks/list di halaman yang baru aktif muncul
+   satu-satu beruntun (bukan langsung serentak semua). */
+function staggerActivePage(){
+    const activePage = document.querySelector('.page.active');
+    if(!activePage) return;
+    const items = activePage.querySelectorAll(
+        '.toc-title, .toc-section, .toc-sub, .toc-subsub, .doclist-item, h2, h3, p'
+    );
+    items.forEach((el, i)=>{
+        el.classList.remove('stagger-in');
+        void el.offsetWidth; // reflow, biar animasinya bisa diulang dari awal
+        el.style.animationDelay = Math.min(i * 35, 550) + 'ms';
+        el.classList.add('stagger-in');
+    });
+}
+
+function goToPage(n){
+    if(typeof stopAllReaders === 'function') stopAllReaders();
+    n = 2; // versi peserta: hanya halaman Dokumen Pemilihan
+    performPageSwitch(()=>{
+        currentPage = n;
+        inDetailView = false;
+        document.body.classList.add('fit-screen-mode');
+        if(typeof startParticleAnimation === 'function') startParticleAnimation();
+        document.getElementById('page2').classList.toggle('active', n === 2);
+        document.getElementById('ikpView').classList.remove('active');
+        document.getElementById('kakView').classList.remove('active');
+        document.getElementById('pdfView').classList.remove('active');
+        document.querySelector('.wrapper').classList.remove('detail-layout');
+        document.getElementById('navPrev').style.display = 'none';
+    });
+}
+function handlePrevClick(){ backToDocList(); }
+
+function enterDetailView(pageId){
+    if(typeof stopAllReaders === 'function') stopAllReaders();
+    performPageSwitch(()=>{
+        document.getElementById('page2').classList.remove('active');
+        document.getElementById('ikpView').classList.toggle('active', pageId === 'ikpView');
+        document.getElementById('kakView').classList.toggle('active', pageId === 'kakView');
+        document.getElementById('pdfView').classList.toggle('active', pageId === 'pdfView');
+        document.getElementById('navPrev').style.display = 'flex';
+        inDetailView = true;
+        document.body.classList.add('fit-screen-mode');
+        document.querySelector('.wrapper').classList.toggle(
+            'detail-layout', pageId === 'ikpView' || pageId === 'kakView'
+        );
+        if(typeof stopParticleAnimation === 'function') stopParticleAnimation(); // hemat tenaga pas baca PDF
+    });
+}
+function backToDocList(){ goToPage(2); }
+
+function showQrDokumenFallback(){
+    document.getElementById('qrDokumenImg').style.display = 'none';
+    document.getElementById('qrDokumenFallback').style.display = 'flex';
+}
+fetch('qr-dokumen.png', {method:'HEAD'}).then(r=>{ if(!r.ok) showQrDokumenFallback(); }).catch(()=>{ /* dibiarkan */ });
+
+/* ============================================================
+   0c) DAFTAR DOKUMEN PEMILIHAN
+   ============================================================
+   Ubah "file" di bawah ini kalau nama file asli di folder anda
+   berbeda dari yang tertulis di sini. Urutan list mengikuti
+   urutan array ini. Baris dengan isIKP:true otomatis membuka
+   tampilan khusus surat+transkrip+audio, bukan file mentah.
+*/
+const documents = [
+    { name: 'Kerangka Acuan Kerja (KAK)',              file: 'kak.pdf',                                    type: 'pdf', isKAK: true,
+      keyPoints: ['Menjelaskan ruang lingkup, target, dan hasil kerja (deliverable) yang diminta.', 'Jadi acuan teknis utama saat menyusun dan mengevaluasi penawaran.', 'Klik \"view\" untuk membaca dokumen beserta ringkasan tiap bab dan sub bab.'] },
+    { name: 'Instruksi Kepada Peserta (IKP)',           file: 'surat.pdf',                                  type: 'pdf', isIKP: true,
+      keyPoints: ['Dokumen utama aturan main pengadaan ini — metode Penunjukan Langsung, nilai Rp 16,46 M.', 'Mengatur syarat dokumen wajib, jadwal, evaluasi, hingga sanksi.', 'Klik "view" untuk membaca dokumen beserta ringkasan tiap bab dan sub bab.'] },
+    { name: 'Bill Of Quantity (BOQ)',                   file: 'boq.pdf',                                    type: 'pdf',
+      keyPoints: ['Rincian daftar item pekerjaan/barang beserta volume dan satuan harga.', 'Jadi dasar perhitungan total harga penawaran peserta.', 'Diisi mengacu ke format BOQ kosong yang diberikan panitia.'] },    
+    { name: 'Surat Undangan Aanwijzing',                file: 'surat_undangan_aanwijzing.pdf',             type: 'pdf',
+      keyPoints: ['Undangan resmi buat peserta menghadiri sesi penjelasan (aanwijzing).', 'Berisi jadwal, lokasi/metode, dan agenda sesi.', 'Jadi dasar formal siapa saja peserta yang diundang mengikuti proses.'] },
+    { name: 'Surat Pernyataan Kesanggupan Pekerjaan',   file: 'surat_pernyataan_kesanggupan_pekerjaan.pdf',type: 'pdf',
+      keyPoints: ['Pernyataan peserta sanggup melaksanakan pekerjaan sesuai KAK.', 'Menegaskan kesiapan sumber daya (tim, alat, waktu) peserta.', 'Bagian dari Dokumen Penawaran Teknis yang wajib dilampirkan.'] },    
+    { name: 'Draft HOA',                              file: 'kontrak_hoa.pdf',                           type: 'pdf',
+      keyPoints: ['Head of Agreement — kesepakatan awal sebelum kontrak final disusun.', 'Merangkum poin-poin pokok kerja sama antara kedua pihak.', 'Jadi dasar penyusunan dokumen kontrak yang lebih rinci (SSUK, dll).'] },
+    { name: 'Draft SSUK',                             file: 'kontrak_ssuk.pdf',                          type: 'pdf',
+      keyPoints: ['Syarat-Syarat Umum Kontrak — aturan baku yang berlaku sepanjang kontrak.', 'Mengatur hak, kewajiban, dan mekanisme penyelesaian jika ada masalah.', 'Berlaku umum, biasanya dilengkapi Syarat Khusus Kontrak per proyek.'] },
+    { name: 'Template Pakta Integritas',                file: 'template_pakta_integritas.pdf',             type: 'pdf',
+      keyPoints: ['Surat pernyataan anti-KKN (Kolusi, Korupsi, Nepotisme) dari peserta.', 'Wajib ditandatangani sebagai bagian Dokumen Penawaran Administrasi.', 'Bentuk komitmen tertulis peserta menjaga integritas proses pengadaan.'] },
+    { name: 'Template Keterangan Tidak Pailit',         file: 'template_keterangan_tidak_pailit.pdf',      type: 'pdf',
+      keyPoints: ['Pernyataan bahwa perusahaan peserta tidak dalam kondisi pailit/bangkrut.', 'Bagian dari syarat kelayakan administrasi peserta.', 'Biasanya perlu ditandatangani di atas materai.'] },
+    { name: 'Template Pernyataan Capaian TKDN',         file: 'template_pernyataan_capaian_tkdn.pdf',      type: 'pdf',
+      keyPoints: ['TKDN = Tingkat Komponen Dalam Negeri dari barang/jasa yang ditawarkan.', 'Menyatakan persentase kandungan lokal sesuai ketentuan pemerintah.', 'Relevan untuk penilaian preferensi produk dalam negeri.'] },
+    { name: 'Template Pernyataan Anti Penyuapan',       file: 'template_pernyataan_anti_penyuapan.pdf',    type: 'pdf',
+      keyPoints: ['Pernyataan komitmen peserta tidak melakukan penyuapan dalam proses ini.', 'Melengkapi Pakta Integritas sebagai lapisan kepatuhan tambahan.', 'Bagian dari Dokumen Penawaran Administrasi yang wajib.'] },
+    { name: 'Template Surat Penawaran Harga',           file: 'template_surat_penawaran_harga.pdf',        type: 'pdf',
+      keyPoints: ['Format resmi buat menuliskan total harga penawaran peserta.', 'Harus sudah termasuk overhead, keuntungan, dan pajak terkait.', 'Bagian dari Dokumen Penawaran Harga (DH-1), wajib diisi.'] }
+];
+
+function openKAKView(){
+    const frame = document.getElementById('pdfFrameKak');
+    if(frame && frame.dataset.loaded !== 'true'){
+        frame.src = 'kak.pdf';
+        frame.dataset.loaded = 'true';
+    }
+    enterDetailView('kakView');
+}
+
+function openIKPView(){
+    const frame = document.getElementById('pdfFrame');
+    if(frame && frame.dataset.loaded !== 'true'){
+        frame.src = 'surat.pdf';
+        frame.dataset.loaded = 'true';
+    }
+    enterDetailView('ikpView');
+}
+
+/* Tiap file PDF dapat iframe SENDIRI yang cuma dibuat sekali (lazy) dan
+   TIDAK PERNAH di-reload/diganti src-nya lagi — cuma disembunyikan/
+   dimunculkan lewat CSS. */
+const pdfIframes = {}; // file -> elemen iframe
+
+function getOrCreatePdfIframe(file){
+    if(pdfIframes[file]) return pdfIframes[file];
+    const iframe = document.createElement('iframe');
+    iframe.title = file;
+    iframe.src = file; // toolbar bawaan TETAP nyala penuh, sengaja nggak dipangkas
+    document.getElementById('pdfIframePool').appendChild(iframe);
+    pdfIframes[file] = iframe;
+    return iframe;
+}
+
+function openDocView(file, name){
+    const pool = document.getElementById('pdfIframePool');
+    const fallback = document.getElementById('pdfViewFallback');
+    document.getElementById('pdfViewTitle').textContent = name;
+    pool.style.display = 'none';
+    fallback.style.display = 'none';
+    currentDocFile = file;
+    Object.values(pdfIframes).forEach(f => f.classList.remove('active'));
+    const frame = getOrCreatePdfIframe(file);
+    frame.classList.add('active');
+    pool.style.display = 'block';
+    fetch(file, {method:'HEAD'}).then(r=>{
+        if(!r.ok){ pool.style.display = 'none'; fallback.style.display = 'flex'; }
+    }).catch(()=>{ /* dibiarkan, beberapa server lokal menolak HEAD */ });
+    enterDetailView('pdfView');
+}
+let currentDocFile = null;
+
+function renderDocumentList(){
+    const container = document.getElementById('doclistScroll');
+    container.innerHTML = documents.map((d, i) => {
+        const action = d.isIKP
+            ? `onclick="openIKPView(); return false;"`
+            : d.isKAK
+            ? `onclick="openKAKView(); return false;"`
+            : `onclick="openDocView('${d.file}','${d.name.replace(/'/g,"\\'")}'); return false;"`;
+        return `
+        <div class="doclist-item${i === documents.length-1 ? ' last-doc-item' : ''}">
+            <span class="doc-num">${i+1}</span>
+            <span class="doc-badge ${d.type}">${d.type === 'pdf' ? 'PDF' : 'DOC'}</span>
+            <span class="doc-name">${d.name}</span>
+            <a class="doc-view" href="#" ${action}>view</a>
+        </div>`;
+    }).join('');
+}
+renderDocumentList();
+
+/* ============================================================
+   0f) BACA OTOMATIS SAAT HOVER (Web Speech API bawaan browser)
+   ============================================================
+   Alih-alih rekaman statis, browser sendiri yang membacakan ISI
+   LENGKAP sub-bab yang sedang ditunjuk mouse di daftar isi IKP
+   (bukan cuma judulnya). Gratis, tidak perlu koneksi/API — pakai
+   suara TTS bawaan sistem/browser. Kalau browser tidak mendukung,
+   fitur ini otomatis diabaikan.
+
+   Ubah/lengkapi teks di object sectionFullText di bawah ini kalau
+   ada sub-bab baru atau redaksi yang perlu diperbaiki.
+*/
+// Catatan: klik (bukan hover) untuk membaca — lihat fungsi startReadingFrom()
+// di bagian "PEMBACA TEKS OTOMATIS" di bawah, yang memakai object ini.
+
+/* ============================================================
+   0b) THEME PICKER — ganti warna tema (background, aksen, partikel)
+   ============================================================ */
+let particleColorRGB = '0,119,182';
+
+function hexToRgb(hex){
+    hex = hex.replace('#','');
+    if(hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
+    const num = parseInt(hex,16);
+    return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 };
+}
+function rgbToHsl(r,g,b){
+    r/=255; g/=255; b/=255;
+    const max=Math.max(r,g,b), min=Math.min(r,g,b);
+    let h,s,l=(max+min)/2;
+    if(max===min){ h=s=0; }
+    else{
+        const d=max-min;
+        s = l>0.5 ? d/(2-max-min) : d/(max+min);
+        switch(max){
+            case r: h=(g-b)/d+(g<b?6:0); break;
+            case g: h=(b-r)/d+2; break;
+            case b: h=(r-g)/d+4; break;
+        }
+        h/=6;
+    }
+    return { h:h*360, s:s*100, l:l*100 };
+}
+function hslToHex(h,s,l){
+    s/=100; l/=100;
+    const c=(1-Math.abs(2*l-1))*s;
+    const x=c*(1-Math.abs((h/60)%2-1));
+    const m=l-c/2;
+    let r=0,g=0,b=0;
+    if(h<60){r=c;g=x;b=0;} else if(h<120){r=x;g=c;b=0;} else if(h<180){r=0;g=c;b=x;}
+    else if(h<240){r=0;g=x;b=c;} else if(h<300){r=x;g=0;b=c;} else {r=c;g=0;b=x;}
+    const toHex=v=>Math.round((v+m)*255).toString(16).padStart(2,'0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+let themeMode = 'light';
+let lastAccentHex = '#ffffff';
+
+function setThemeMode(mode){
+    themeMode = mode;
+    document.getElementById('modeLight').classList.toggle('active', mode === 'light');
+    document.getElementById('modeDark').classList.toggle('active', mode === 'dark');
+    applyThemeFromAccent(lastAccentHex, document.querySelector('.theme-swatch.selected'));
+}
+
+function applyThemeFromAccent(hex, swatchEl){
+    lastAccentHex = hex;
+    const { r, g, b } = hexToRgb(hex);
+    const { h, s } = rgbToHsl(r, g, b);
+    const root = document.documentElement.style;
+    const accentSat = Math.max(s, 45);
+    const dark = themeMode === 'dark';
+    const isWhite = (Math.max(r,g,b) - Math.min(r,g,b)) < 12 && Math.min(r,g,b) > 235;
+
+    if(isWhite){
+        if(!dark){
+            root.setProperty('--bg-mid',  '#ffffff');
+            root.setProperty('--bg-deep', '#e9ecef');
+            root.setProperty('--cyan',    '#2b2b2b');
+            root.setProperty('--text-strong', '#111111');
+            root.setProperty('--text-dim', 'rgba(17,17,17,0.62)');
+            root.setProperty('--active-bg', 'rgba(232,169,61,.22)');
+            root.setProperty('--active-text', '#6b4a06');
+            root.setProperty('--hint-color', '#c0392b');
+            root.setProperty('--card-bg', 'rgba(255,255,255,.72)');
+            root.setProperty('--toc-bg', 'rgba(255,255,255,.30)');
+            root.setProperty('--card-bg-solid', '#ffffff');
+            root.setProperty('--cyan-soft', 'rgba(0,0,0,0.25)');
+            root.setProperty('--accent-rgb', '0,0,0');
+            particleColorRGB = '110,110,110';
+        } else {
+            root.setProperty('--bg-mid',  '#1c1c1c');
+            root.setProperty('--bg-deep', '#000000');
+            root.setProperty('--cyan',    '#858585');
+            root.setProperty('--text-strong', '#f5f5f5');
+            root.setProperty('--text-dim', 'rgba(235,235,235,0.78)');
+            root.setProperty('--active-bg', 'rgba(255,214,102,.16)');
+            root.setProperty('--active-text', '#ffe9b3');
+            root.setProperty('--hint-color', '#ff9d9d');
+            root.setProperty('--card-bg', 'rgba(24,24,24,.6)');
+            root.setProperty('--toc-bg', 'rgba(10,10,10,.40)');
+            root.setProperty('--card-bg-solid', '#141414');
+            root.setProperty('--cyan-soft', 'rgba(255,255,255,0.28)');
+            root.setProperty('--accent-rgb', '255,255,255');
+            particleColorRGB = '255,255,255';
+        }
+        root.setProperty('--toc-halo', 'transparent');
+        document.querySelectorAll('.theme-swatch').forEach(el=>el.classList.remove('selected'));
+        if(swatchEl) swatchEl.classList.add('selected');
+        document.getElementById('customColorInput').value = '#ffffff';
+        return;
+    }
+
+    if(!dark){
+        root.setProperty('--bg-mid',  hslToHex(h, Math.min(accentSat*0.35, 35), 96));
+        root.setProperty('--bg-deep', hslToHex(h, Math.min(accentSat*0.45, 45), 85));
+        root.setProperty('--cyan',    hslToHex(h, accentSat, 42));
+        root.setProperty('--text-strong', hslToHex(h, Math.min(accentSat*0.5,40), 16));
+        root.setProperty('--text-dim', `rgba(${Math.round(r*0.3)},${Math.round(g*0.3+10)},${Math.round(b*0.35+20)},0.72)`);
+        root.setProperty('--active-bg', 'rgba(232,169,61,.22)');
+        root.setProperty('--active-text', '#6b4a06');
+        root.setProperty('--hint-color', '#c0392b');
+        root.setProperty('--card-bg', 'rgba(255,255,255,.72)');
+        root.setProperty('--toc-bg', 'rgba(255,255,255,.30)');
+        root.setProperty('--toc-halo', 'transparent');
+        root.setProperty('--card-bg-solid', '#ffffff');
+        particleColorRGB = `${r},${g},${b}`;
+    } else {
+        root.setProperty('--bg-mid',  hslToHex(h, Math.min(accentSat*0.55, 45), 20));
+        root.setProperty('--bg-deep', hslToHex(h, Math.min(accentSat*0.6, 55), 8));
+        root.setProperty('--cyan',    hslToHex(h, Math.min(accentSat+15,90), 60));
+        root.setProperty('--text-strong', '#f3f6fb');
+        root.setProperty('--text-dim', `rgba(226,232,245,0.82)`);
+        root.setProperty('--active-bg', 'rgba(255,214,102,.16)');
+        root.setProperty('--active-text', '#ffe9b3');
+        root.setProperty('--hint-color', '#ff9d9d');
+        root.setProperty('--card-bg', 'rgba(20,26,40,.55)');
+        root.setProperty('--toc-bg', 'rgba(20,26,40,.35)');
+        root.setProperty('--toc-halo', 'transparent');
+        root.setProperty('--card-bg-solid', hslToHex(h, 15, 14));
+        particleColorRGB = `${r},${g},${b}`;
+    }
+    root.setProperty('--cyan-soft', `rgba(${r},${g},${b},0.35)`);
+    root.setProperty('--accent-rgb', `${r},${g},${b}`);
+
+    document.querySelectorAll('.theme-swatch').forEach(el=>el.classList.remove('selected'));
+    if(swatchEl) swatchEl.classList.add('selected');
+    document.getElementById('customColorInput').value = hex;
+}
+
+/* ============================================================
+   0d) FONT SIZE PICKER — ukuran teks (S/M/L/XL)
+   ============================================================ */
+function setFontScale(scale, btnEl){
+    document.documentElement.style.setProperty('--font-scale', scale);
+    document.querySelectorAll('.font-size-btn').forEach(b=>b.classList.remove('active'));
+    if(btnEl) btnEl.classList.add('active');
+}
+
+/* ============================================================
+   0e) TOMBOL +/- MANUAL: ukuran kotak video, kotak QR & teks transkrip
+   ============================================================ */
+
+
+function adjustTocWidth(deltaPx){
+    const root = document.documentElement;
+    const current = parseInt(getComputedStyle(root).getPropertyValue('--toc-base')) || 520;
+    const next = Math.max(360, Math.min(800, current + deltaPx));
+    root.style.setProperty('--toc-base', next + 'px');
+}
+
+function adjustTranscriptFontSize(delta){
+    const root = document.documentElement;
+    const current = parseFloat(getComputedStyle(root).getPropertyValue('--transcript-font-scale')) || 1;
+    const next = Math.max(0.7, Math.min(2, +(current + delta).toFixed(2)));
+    root.style.setProperty('--transcript-font-scale', next);
+}
+
+/* ============================================================
+   1) PARTIKEL BINTANG LATAR BELAKANG
+   ============================================================ */
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+function createParticles(){
+    particles = [];
+    const count = Math.floor((canvas.width * canvas.height) / 16000);
+    for(let i=0;i<count;i++){
+        particles.push({
+            x: Math.random()*canvas.width,
+            y: Math.random()*canvas.height,
+            r: Math.random()*1.4+0.3,
+            speedY: Math.random()*0.25+0.05,
+            alpha: Math.random()*0.6+0.2
+        });
+    }
+}
+window.addEventListener('resize', ()=>{ resizeCanvas(); createParticles(); });
+resizeCanvas(); createParticles();
+let particleAnimationId = null;
+function animateParticles(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle = `rgba(${particleColorRGB},${p.alpha * 0.7})`;
+        ctx.fill();
+        p.y -= p.speedY;
+        if(p.y < 0) p.y = canvas.height;
+    });
+    particleAnimationId = requestAnimationFrame(animateParticles);
+}
+function startParticleAnimation(){
+    if(particleAnimationId === null) animateParticles();
+}
+function stopParticleAnimation(){
+    if(particleAnimationId !== null){
+        cancelAnimationFrame(particleAnimationId);
+        particleAnimationId = null;
+    }
+}
+startParticleAnimation();
+
+/* ============================================================
+   2) PDF FALLBACK CHECK
+   ============================================================ */
+function showPdfFallback(){
+    document.getElementById('pdfFrame').style.display='none';
+    document.getElementById('pdfFallback').style.display='flex';
+}
+// iframe tidak selalu memicu onerror saat 404 lokal, jadi cek manual juga
+fetch('surat.pdf', {method:'HEAD'}).then(r=>{ if(!r.ok) showPdfFallback(); }).catch(()=>{ /* dibiarkan, beberapa server lokal menolak HEAD */ });
+
+function stopAllReaders(){}
+
+// ---- IKP (surat.pdf) ----
+
+
+
+// ---- KAK (kak.pdf) ----
+const kakPageMap = {"kak-TITLE": 1, "kak-I": 2, "kak-II": 2, "kak-II1": 2, "kak-II2": 3, "kak-III": 3, "kak-III1": 3, "kak-III1a": 3, "kak-III1b": 6, "kak-III2": 6, "kak-III2a": 6, "kak-III2b": 7, "kak-III2c": 8, "kak-III3": 9, "kak-III4": 11, "kak-III4a": 11, "kak-III4b": 11, "kak-III5": 13, "kak-III6": 13, "kak-IV": 13, "kak-V": 14, "kak-VI": 14, "kak-VII": 15, "kak-VIII": 15, "kak-VIIIa": 16, "kak-VIIIb": 17, "kak-IX": 17, "kak-X": 18, "kak-XI": 19, "kak-XII": 20, "kak-XIII": 21, "kak-XIV": 21, "kak-XV": 21};
+
+function showPdfFallbackKak(){
+    document.getElementById('pdfFrameKak').style.display = 'none';
+    document.getElementById('pdfFallbackKak').style.display = 'flex';
+}
+fetch('kak.pdf', {method:'HEAD'}).then(r=>{ if(!r.ok) showPdfFallbackKak(); }).catch(()=>{ /* dibiarkan */ });
+
+
+/* ============================================================
+   6) LAYAR PENUH
+   ============================================================ */
+function toggleFullScreen(){
+    const fsBtn = document.getElementById('fsBtn');
+    if(!document.fullscreenElement){
+        document.documentElement.requestFullscreen().catch(()=>{});
+        fsBtn.textContent = '⛶';
+    } else {
+        document.exitFullscreen();
+        fsBtn.textContent = '⛶';
+    }
+}
+document.addEventListener('fullscreenchange', ()=>{
+    document.body.classList.toggle('is-fullscreen', !!document.fullscreenElement);
+});
+
+/* ============================================================
+   7) STOPWATCH SESI (mulai begitu video intro diputar; klik badge
+      buat stop/lanjutkan manual kapan aja)
+   ============================================================ */
+
+/* Jam WIB live, selalu jalan dari halaman dibuka */
+function updateClock(){
+    const now = new Date();
+    const wib = new Date(now.getTime() + (now.getTimezoneOffset()*60000) + (7*3600000));
+    const h = wib.getHours().toString().padStart(2,'0');
+    const m = wib.getMinutes().toString().padStart(2,'0');
+    document.getElementById('clockTime').textContent = `${h}:${m}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+
+
+
+
+/* ============================================================
+   RINGKASAN BAB DAN SUB BAB (versi peserta)
+   Klik judul bab/sub bab -> PDF di kiri loncat ke halamannya.
+   ============================================================ */
+const RINGKASAN = {
+  ikp: { frameId:'pdfFrame',    file:'surat.pdf', listId:'sumListIkp', items:[
+ {
+  "lvl": "bab",
+  "id": "toc-A",
+  "t": "A. UMUM",
+  "x": null,
+  "p": 1
+ },
+ {
+  "lvl": "sub",
+  "id": "toc-A1",
+  "t": "A.1. Data pada Proses Pengadaan",
+  "x": "Pengadaan ini berupa jasa lainnya untuk kegiatan Opex, dengan nilai RAB atau HPS sebesar Rp16.463.520.000 sudah termasuk PPN. Jenis RKAP-nya multi years, yaitu tahun 2026 sampai 2028.",
+  "p": 1
+ },
+ {
+  "lvl": "sub",
+  "id": "toc-A2",
+  "t": "A.2. Pedoman Pengadaan",
+  "x": "Proses mengacu pada Keputusan Direksi Nomor IAS.0125-A/PER.DIR.17.01/2024 (29 November 2024) tentang Kebijakan Pengadaan Barang/Jasa Inbound. Pengadaan melalui e-procurement dengan metode Penunjukan Langsung, yang dapat digunakan untuk nilai berapa pun jika memenuhi kriteria atau disetujui Direksi.",
+  "p": 1
+ },
+ {
+  "lvl": "sub",
+  "id": "toc-A3",
+  "t": "A.3. Definisi",
+  "x": "Bagian ini mendefinisikan istilah dalam IKP. Peserta adalah penyedia yang terdaftar, lulus prakualifikasi e-procurement, dan diundang. Dokumen teknis meliputi KAK, RAB, BOQ kosong, serta gambar dan form penilaian bila ada.",
+  "p": 1
+ },
+ {
+  "lvl": "sub",
+  "id": "toc-A4",
+  "t": "A.4. Proses Pengadaan dalam Kondisi Tertentu",
+  "x": "Mengatur keadaan yang dapat memengaruhi jalannya pengadaan, yaitu pengadaan ditunda, dilakukan secara manual, dinyatakan gagal atau batal, peserta gugur, dan pengenaan sanksi. Rinciannya terdapat pada poin a sampai f.",
+  "p": 2
+ },
+ {
+  "lvl": "subsub",
+  "id": "toc-A4a",
+  "t": "a. Pengadaan ditunda",
+  "x": "Pengadaan ditunda apabila terdapat indikasi manipulasi harga (mark up maupun mark down), proyek fiktif, pemalsuan identitas mitra bisnis, atau barang/jasa yang kualitasnya di bawah kesepakatan.",
+  "p": 2
+ },
+ {
+  "lvl": "subsub",
+  "id": "toc-A4b",
+  "t": "b. Pemilihan secara manual (offline)",
+  "x": "Pemilihan boleh dilakukan secara manual jika sistem e-procurement terganggu. Syaratnya, Unit Kerja Information Technology sudah menerbitkan surat pernyataan bahwa terdapat kendala pada sistem informasi perusahaan.",
+  "p": 2
+ },
+ {
+  "lvl": "subsub",
+  "id": "toc-A4c",
+  "t": "c. Pengadaan dinyatakan gagal",
+  "x": "Pengadaan gagal bila tidak terdapat peserta yang lulus, dokumen pemilihan salah, tidak terdapat penawaran setelah perpanjangan, atau negosiasi tidak tercapai. Alasan lain: benturan kepentingan, indikasi KKN/persekongkolan, sanggahan terbukti, semua penawaran melebihi HPS/RAB, atau seluruh pemenang mundur.",
+  "p": 2
+ },
+ {
+  "lvl": "subsub",
+  "id": "toc-A4d",
+  "t": "d. Pengadaan dinyatakan batal",
+  "x": "Pengadaan dapat dibatalkan secara tertulis oleh Unit Teknis karena penyimpangan atau alasan teknis, perubahan KAK/kebutuhan, putusan pengadilan, KKN/penipuan, force majeure, atau perubahan HPS setelah diumumkan. Pembatalan juga berlaku jika RKAP pengadaan tidak mengikat tidak disetujui RUPS/Dewan Komisaris atau terbukti terdapat benturan kepentingan.",
+  "p": 2
+ },
+ {
+  "lvl": "subsub",
+  "id": "toc-A4e",
+  "t": "e. Peserta dinyatakan gugur",
+  "x": "Peserta gugur jika dokumen administrasi/teknis wajib tidak lengkap, nilai teknis di bawah passing grade saat aanwijzing, atau klarifikasi tak dapat dipertanggungjawabkan. Pada pengadaan manual, harga setelah koreksi yang melebihi RAB/HPS juga menggugurkan peserta, kecuali Penunjukan Langsung.",
+  "p": 3
+ },
+ {
+  "lvl": "subsub",
+  "id": "toc-A4f",
+  "t": "f. Pengenaan sanksi",
+  "x": "Sanksi dapat dikenakan atas pelanggaran etika, upaya memengaruhi petugas, persekongkolan harga, indikasi KKN/penipuan, mundur tanpa alasan setelah ditunjuk, wanprestasi, atau penolakan jaminan pelaksanaan 5% RAB/HPS. Sanksinya Daftar Hitam 2 tahun atau suspend maksimal 1 tahun untuk pelanggaran lebih ringan.",
+  "p": 3
+ },
+ {
+  "lvl": "bab",
+  "id": "toc-B",
+  "t": "B. DOKUMEN PEMILIHAN",
+  "x": null,
+  "p": 3
+ },
+ {
+  "lvl": "sub",
+  "id": "toc-B1",
+  "t": "B.1. Isi Dokumen Pemilihan",
+  "x": "Peserta wajib memeriksa seluruh isi dokumen pemilihan. Penawaran yang tidak memenuhi persyaratan sepenuhnya menjadi risiko peserta. Dokumen bersifat rahasia dan hanya boleh diberikan kepada pihak yang membantu menyiapkan penawaran.",
+  "p": 3
+ },
+ {
+  "lvl": "sub",
+  "id": "toc-B2",
+  "t": "B.2. Pemberian Penjelasan / Aanwijzing",
+  "x": "Aanwijzing dilakukan offline; Unit Pengadaan memberi kesempatan bertanya dan bersama Unit Teknis menjawab. Tanya jawab dicatat dalam Berita Acara dan diunggah ke e-procurement. Jika diperlukan, aanwijzing lapangan dibiayai peserta, dan aanwijzing tambahan menjadi bagian dokumen pengadaan.",
+  "p": 3
+ },
+ {
+  "lvl": "bab",
+  "id": "toc-C",
+  "t": "C. PENYIAPAN PENAWARAN",
+  "x": null,
+  "p": 4
+ },
+ {
+  "lvl": "sub",
+  "id": "toc-C1",
+  "t": "C.1. Biaya Dokumen Penawaran",
+  "x": "Seluruh biaya penyiapan dan penyampaian penawaran ditanggung peserta. Unit Pengadaan dan Unit Teknis tidak bertanggung jawab atas kerugian yang dialami peserta.",
+  "p": 4
+ },
+ {
+  "lvl": "sub",
+  "id": "toc-C2",
+  "t": "C.2. Dokumen Penawaran",
+  "x": "Tiga bagian penawaran wajib disampaikan: Administrasi (pernyataan TKDN, Anti Pailit, Anti Suap, dan Pakta Integritas); Teknis (Surat Pernyataan Kesanggupan dan brosur); serta Harga (Surat Penawaran Harga dan BOQ berdasarkan BOQ kosong).",
+  "p": 4
+ },
+ {
+  "lvl": "sub",
+  "id": "toc-C3",
+  "t": "C.3. Harga Penawaran",
+  "x": "Penawaran berlaku selama 30 hari kalender sejak dimasukkan oleh penyedia. Biaya overhead, keuntungan, dan seluruh pajak sudah harus termasuk dalam total harga penawaran.",
+  "p": 4
+ },
+ {
+  "lvl": "bab",
+  "id": "toc-D",
+  "t": "D. PEMASUKAN DOKUMEN PENAWARAN",
+  "x": null,
+  "p": 5
+ },
+ {
+  "lvl": "sub",
+  "id": "toc-D1",
+  "t": "D.1. Penyampaian Dokumen Penawaran",
+  "x": "Unggah dokumen di https://vendor.ias.id dalam format PDF atau RAR/ZIP (maksimal 20 MB per dokumen), lalu isi form sistem. Dokumen administrasi, teknis, dan harga dapat diunggah bertahap atau diganti hingga batas akhir; setelah itu tidak dapat diubah.",
+  "p": 5
+ },
+ {
+  "lvl": "sub",
+  "id": "toc-D2",
+  "t": "D.2. Batas Akhir Pemasukan Dokumen Penawaran",
+  "x": "Dokumen harus masuk secara elektronik melalui e-procurement paling lambat Kamis, 14 September 2026 pukul 14.00 WIB, mengikuti waktu server aplikasi.",
+  "p": 5
+ },
+ {
+  "lvl": "bab",
+  "id": "toc-E",
+  "t": "E. PEMBUKAAN DOKUMEN PENAWARAN",
+  "x": "Dokumen administrasi, teknis, dan harga diunduh sekaligus dalam satu tahap oleh Unit Pengadaan bersama Unit Teknis.",
+  "p": 5
+ },
+ {
+  "lvl": "bab",
+  "id": "toc-F",
+  "t": "F. TATA CARA EVALUASI PENAWARAN",
+  "x": "Isi penawaran tidak boleh ditambah, dikurangi, atau diubah. Evaluasi administrasi, teknis, dan harga menggunakan sistem gugur. Kesalahan perkalian volume dan harga satuan dikoreksi tanpa mengubah harga satuan; harga tak wajar diklarifikasi dan dicatat dalam berita acara.",
+  "p": 5
+ },
+ {
+  "lvl": "bab",
+  "id": "toc-G",
+  "t": "G. NEGOSIASI HARGA",
+  "x": "Pada Penunjukan Langsung, negosiasi dilakukan oleh Unit Pengadaan bersama Unit Teknis dengan peserta yang ditunjuk. Negosiasi dilakukan atas harga per item untuk menghitung harga satuan, dan hasilnya tidak boleh melebihi harga penawaran.",
+  "p": 5
+ },
+ {
+  "lvl": "bab",
+  "id": "toc-H",
+  "t": "H. PENUNJUKAN PELAKSANA PEKERJAAN",
+  "x": "Unit Teknis menerbitkan SKPPBJ dan peserta yang ditunjuk wajib menerimanya. Jika peserta mengundurkan diri saat masa berlaku penawarannya masih berjalan, ia dimasukkan ke Daftar Hitam. Jika pelaksana yang ditunjuk mengundurkan diri, pengadaan dinyatakan gagal.",
+  "p": 5
+ },
+ {
+  "lvl": "bab",
+  "id": "toc-I",
+  "t": "I. DOKUMEN KONTRAK (HOA DAN SSUK)",
+  "x": "Kontrak ditandatangani oleh Direksi yang namanya tercantum dalam Akta Pendirian atau Anggaran Dasar penyedia. Pihak lain hanya dapat menandatangani dengan kuasa atau pendelegasian wewenang yang sah dari Direksi. Lokasi penandatanganan ditentukan oleh Unit Teknis, kecuali ditentukan lain.",
+  "p": 6
+ },
+ {
+  "lvl": "bab",
+  "id": "toc-J",
+  "t": "J. LAIN-LAIN",
+  "x": "Jika diperlukan, perusahaan dapat melakukan kunjungan pabrikasi terhadap barang yang menjadi objek perjanjian atau barang yang mendukung objek perjanjian.",
+  "p": 6
+ }
+] },
+  kak: { frameId:'pdfFrameKak', file:'kak.pdf',   listId:'sumListKak', items:[
+ {
+  "lvl": "bab",
+  "id": "kak-I",
+  "t": "I. PENDAHULUAN",
+  "x": "Untuk mendukung pemeriksaan keamanan kargo dan pos yang efektif serta sesuai KM 39 Tahun 2024 tentang Program Keamanan Penerbangan Nasional, IAS menyewa perangkat keamanan penerbangan yang memenuhi spesifikasi teknis, standar mutu, dan persyaratan regulator.",
+  "p": 2
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-II",
+  "t": "II. MAKSUD DAN TUJUAN",
+  "x": null,
+  "p": 2
+ },
+ {
+  "lvl": "sub",
+  "id": "kak-II1",
+  "t": "II.1. Maksud",
+  "x": "RKST menjadi pedoman penyediaan fasilitas/perangkat pendukung keamanan penerbangan di IAS agar pekerjaan terencana, terukur, dan sesuai ketentuan teknis, administratif, operasional, serta peraturan.",
+  "p": 2
+ },
+ {
+  "lvl": "sub",
+  "id": "kak-II2",
+  "t": "II.2. Tujuan",
+  "x": "Terdapat lima tujuan: pekerjaan sesuai kebutuhan operasional dan standar layanan IAS; fasilitas dan perangkat andal serta layak operasi; mendukung kelancaran dan kesinambungan pemeriksaan keamanan kargo dan pos; patuh pada peraturan, standar keamanan penerbangan, dan kebijakan perusahaan; serta pengadaan yang transparan, akuntabel, dan kompetitif.",
+  "p": 3
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-III",
+  "t": "III. RUANG LINGKUP",
+  "x": "Selama kontrak, penyedia memasang, mengintegrasikan, menguji, memelihara, memperbaiki, dan menjamin ketersediaan X-Ray Dual View Kargo dan Bagasi. Cakupan: peralatan, personel, pendukung, pemeliharaan/dukungan teknis, dokumentasi, dan pembiayaan.",
+  "p": 3
+ },
+ {
+  "lvl": "sub",
+  "id": "kak-III1",
+  "t": "III.1. Penyediaan Peralatan Pemeriksaan Keamanan Penerbangan",
+  "x": "Peralatan harus dalam kondisi baik, siap operasi (ready to use), dan sesuai spesifikasi teknis yang ditetapkan perusahaan. Spesifikasi rincinya terdapat pada Tabel 1.",
+  "p": 3
+ },
+ {
+  "lvl": "subsub",
+  "id": "kak-III1a",
+  "t": "Spesifikasi peralatan (Tabel 1)",
+  "x": "Tabel 1 menetapkan 16 spesifikasi X-Ray kargo dan bagasi: Dual View, buatan minimal 2021 dan baru (dibuktikan dokumen), teknologi multi-view, UPS/penstabil tegangan, penyimpanan hasil pemeriksaan dan log, serta koneksi ke sistem monitoring. Peralatan wajib memenuhi standar keamanan penerbangan dan keselamatan radiasi, serta sertifikasi/pengujian regulator.",
+  "p": 3
+ },
+ {
+  "lvl": "subsub",
+  "id": "kak-III1b",
+  "t": "Ketentuan umum peralatan",
+  "x": "Spesifikasi dalam tabel merupakan batas minimum. Penyedia boleh menawarkan yang lebih tinggi selama fungsi, kompatibilitas, dan keamanannya tidak berkurang, dan wajib membuktikannya lewat dokumen teknis, brosur, atau sertifikasi. Pengiriman awal ke lokasi dilakukan IAS melalui lini bisnis logistik dengan biaya IAS. Jika peralatan rusak saat mobilisasi atau demobilisasi, penyedia mengganti unit dan menanggung biayanya.",
+  "p": 6
+ },
+ {
+  "lvl": "sub",
+  "id": "kak-III2",
+  "t": "III.2. Penyedia Personel",
+  "x": "Penyedia wajib menyediakan personel yang kompeten untuk instalasi, commissioning, preventive dan corrective maintenance, troubleshooting, kalibrasi, serta dukungan teknis selama kontrak.",
+  "p": 6
+ },
+ {
+  "lvl": "subsub",
+  "id": "kak-III2a",
+  "t": "Kualifikasi personel (Tabel 2)",
+  "x": "Personel minimal lulusan SMA/SMK, berpengalaman 3 tahun menangani peralatan sinar-X/sejenis, memahami operasi dan perbaikan, memiliki sertifikat relevan, sehat, serta menerapkan K3 dan keselamatan radiasi. Biaya termasuk sewa; personel yang tak memenuhi kualifikasi wajib diganti tanpa biaya bagi IAS.",
+  "p": 6
+ },
+ {
+  "lvl": "subsub",
+  "id": "kak-III2b",
+  "t": "Tugas dan tanggung jawab (Tabel 3)",
+  "x": "Terdapat sebelas tugas, di antaranya melaksanakan preventive dan corrective maintenance, inspeksi dan kalibrasi, menyusun laporan harian dan bulanan, menjaga pencapaian SLA, memantau kondisi peralatan, menangani gangguan dengan cepat, memberi rekomendasi teknis, dan berkoordinasi dengan perwakilan perusahaan.",
+  "p": 7
+ },
+ {
+  "lvl": "subsub",
+  "id": "kak-III2c",
+  "t": "Penempatan dan penggantian personel (Tabel 4 dan 5)",
+  "x": "Personel teknis harus dapat dimobilisasi sesuai kebutuhan, ditempatkan on-site dan/atau stand by mengikuti jadwal dan pola shift lokasi, serta hadir sesuai response time SLA saat terjadi gangguan kritikal. Penggantian personel harus disetujui perusahaan, penggantinya berkualifikasi setara atau lebih tinggi, tidak boleh menurunkan kualitas layanan, dan biayanya ditanggung penyedia.",
+  "p": 8
+ },
+ {
+  "lvl": "sub",
+  "id": "kak-III3",
+  "t": "III.3. Penyedia dan Peralatan Pendukung",
+  "x": "Tabel 6 mewajibkan alat pendukung seperti standard test piece, dosimeter, power quality analyzer, survey meter, toolkit, multimeter, laptop/software, APD, dan UPS tester. Disediakan tanpa biaya tambahan, laik pakai, dan terkalibrasi bila diwajibkan; IAS berhak memeriksa ketersediaannya.",
+  "p": 9
+ },
+ {
+  "lvl": "sub",
+  "id": "kak-III4",
+  "t": "III.4. Pemeliharaan dan Dukungan Teknis",
+  "x": "Penyedia wajib melaksanakan pemeliharaan selama kontrak agar peralatan tetap andal.",
+  "p": 11
+ },
+ {
+  "lvl": "subsub",
+  "id": "kak-III4a",
+  "t": "Lingkup pemeliharaan (Tabel 7)",
+  "x": "Terdiri dari enam jenis: preventive maintenance, corrective maintenance, emergency maintenance, penggantian suku cadang, pembaruan firmware, serta testing dan commissioning setelah perbaikan.",
+  "p": 11
+ },
+ {
+  "lvl": "subsub",
+  "id": "kak-III4b",
+  "t": "Service Level Agreement (Tabel 8)",
+  "x": "Ketersediaan peralatan minimal 95 persen setiap bulan kalender. Penyedia merespons laporan gangguan dan menugaskan teknisi paling lambat 1 x 24 jam, menyediakan sarana pengganti jika kerusakan mengganggu operasional, menjaga kalibrasi dan kelaikan operasi, serta melapor secara berkala. Seluruh biaya pemeliharaan, suku cadang, kalibrasi, dan pengujian ditanggung penyedia.",
+  "p": 11
+ },
+ {
+  "lvl": "sub",
+  "id": "kak-III5",
+  "t": "III.5. Dokumentasi",
+  "x": "Penyedia menyerahkan lima jenis dokumen (Tabel 9): dokumen pelaksanaan pekerjaan; dokumen pemeliharaan dan perbaikan; dokumen pengujian, kalibrasi, sertifikasi, dan kelaikan operasi; laporan operasional dan kinerja peralatan; serta dokumen administrasi dan pendukung lainnya. Waktu penyerahannya mengikuti tahapan pekerjaan atau kesepakatan.",
+  "p": 13
+ },
+ {
+  "lvl": "sub",
+  "id": "kak-III6",
+  "t": "III.6. Ketentuan Pembiayaan",
+  "x": "Harga sewa bersifat all inclusive, mencakup unit peralatan, instalasi, commissioning, pemeliharaan, suku cadang, personel, alat bantu, kalibrasi, pengujian, sertifikasi, uji kebocoran radiasi, pembaruan firmware, dukungan teknis, dokumentasi, dan pelaporan. Yang tidak termasuk hanya mobilisasi dan demobilisasi pengiriman awal, yang menjadi tanggung jawab IAS. Mobilisasi akibat kerusakan atau penggantian unit ditanggung penyedia.",
+  "p": 13
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-IV",
+  "t": "IV. TINGKAT KOMPONEN DALAM NEGERI (TKDN)",
+  "x": "Pengadaan ini berupa jasa sewa oleh penyedia berbadan hukum Indonesia. Peralatan buatan luar negeri boleh digunakan selama memenuhi spesifikasi teknis. Dalam perhitungan TKDN, peralatan produksi luar negeri yang dimiliki penyedia dalam negeri dihitung sebesar 75 persen komponen dalam negeri.",
+  "p": 13
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-V",
+  "t": "V. BIDANG DAN/ATAU SUB BIDANG PENYEDIA",
+  "x": "Penyedia harus memiliki bidang usaha yang sesuai dengan ruang lingkup pekerjaan, dibuktikan dengan NIB dan/atau izin usaha lain yang masih berlaku. Bidang usaha yang dipersyaratkan (Tabel 10) adalah KBLI 77399, yaitu penyewaan dan sewa guna usaha tanpa hak opsi atas mesin, peralatan, dan barang berwujud lainnya YTDL.",
+  "p": 14
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-VI",
+  "t": "VI. MUTU, VOLUME, DAN HASIL KERJA YANG HARUS DICAPAI",
+  "x": "Mutu: pekerjaan sesuai ruang lingkup, spesifikasi teknis, dan SLA, dengan penerapan sistem manajemen mutu serta K3L. Volume: unit X-Ray sesuai jumlah yang dipersyaratkan, termasuk instalasi, commissioning, pemeliharaan, suku cadang, dukungan teknis, dan personel. Hasil kerja: unit berfungsi dan siap dioperasikan, pemeliharaan terlaksana sesuai SLA, dan dokumen pendukung lengkap.",
+  "p": 14
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-VII",
+  "t": "VII. TEMPAT PELAKSANAAN PEKERJAAN",
+  "x": "Pekerjaan dilaksanakan di enam lokasi dengan masing-masing satu unit: X-Ray kargo Dual View di BDJ dan PNK, serta X-Ray bagasi Dual View di PLM, DPS, PKU, dan BDO. Jika lokasi berubah, bertambah, atau berkurang sesuai kebutuhan operasional IAS, penyedia menyesuaikan selama ruang lingkup pekerjaan tidak berubah.",
+  "p": 15
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-VIII",
+  "t": "VIII. JANGKA WAKTU DAN JADWAL PELAKSANAAN PEKERJAAN",
+  "x": "Jangka waktu pelaksanaan adalah 36 bulan sejak tanggal yang ditetapkan dalam kontrak, dengan opsi perpanjangan berdasarkan evaluasi kinerja penyedia, kebutuhan operasional, ketersediaan anggaran, dan persetujuan pejabat berwenang. Selama kontrak, penyedia menjamin ketersediaan dan keandalan peralatan.",
+  "p": 15
+ },
+ {
+  "lvl": "sub",
+  "id": "kak-VIIIa",
+  "t": "Jadwal pelaksanaan pekerjaan (Tabel 12)",
+  "x": "Terdapat empat tahapan. Pertama, penyediaan peralatan paling lambat 60 hari kalender sejak tanggal efektif kontrak, sampai peralatan tiba di lokasi dalam kondisi siap diinstalasi. Kedua, instalasi, konfigurasi, commissioning, dan uji fungsi sampai peralatan siap beroperasi. Ketiga, sertifikasi atau pengujian regulator bila dipersyaratkan, dengan pendampingan teknis dari penyedia. Keempat, operasional, pemeliharaan, dan dukungan teknis selama kontrak.",
+  "p": 16
+ },
+ {
+  "lvl": "sub",
+  "id": "kak-VIIIb",
+  "t": "Ketentuan umum jadwal",
+  "x": "Jangka waktu tidak termasuk mobilisasi pengiriman awal yang menjadi tanggung jawab IAS. Penyedia melakukan instalasi sampai siap operasi setelah alat diterima, menanggung mobilisasi unit pengganti jika terjadi kerusakan, dan menyediakan personel pendamping saat pengujian regulator. Jadwal dapat disesuaikan dengan kebutuhan operasional selama jangka waktu kontrak tidak berubah.",
+  "p": 17
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-IX",
+  "t": "IX. TEMPAT PENYERAHAN PEKERJAAN",
+  "x": "Penyerahan dilakukan di lokasi operasional IAS sesuai penempatan peralatan, yaitu enam lokasi yang sama dengan tempat pelaksanaan (Tabel 13). Unit Teknis bersama penyedia memeriksa, menguji fungsi, dan memverifikasi hasil pekerjaan. Jika sesuai, penyerahan dituangkan dalam Berita Acara. Bila terdapat ketidaksesuaian, penyedia memperbaikinya tanpa biaya tambahan. Penandatanganan Berita Acara tidak menghapus kewajiban pemeliharaan, dukungan teknis, dan SLA selama kontrak.",
+  "p": 17
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-X",
+  "t": "X. JENIS KONTRAK",
+  "x": "Kontrak yang digunakan adalah lump sum, yaitu bernilai tetap dan sudah mencakup seluruh biaya pekerjaan. Pembayaran dilakukan bulanan berdasarkan verifikasi pemenuhan ruang lingkup, pencapaian SLA, dan kelengkapan dokumen penagihan. Ketentuan lebih lanjut diatur dalam kontrak.",
+  "p": 18
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-XI",
+  "t": "XI. TATA CARA PEMBAYARAN",
+  "x": "Pembayaran dilakukan bulanan atas layanan yang sudah dilaksanakan, diverifikasi, dan memenuhi ketentuan kontrak, termasuk SLA. Penyedia melampirkan dokumen penagihan (sebelas jenis), antara lain surat permohonan pembayaran, invoice asli, kwitansi bermaterai, faktur pajak, berita acara pemeriksaan dan evaluasi, serta laporan layanan bulanan. Dokumen yang belum lengkap dapat dikembalikan untuk diperbaiki. Jika SLA tidak terpenuhi, IAS dapat menyesuaikan nilai pembayaran atau mengenakan denda dan service credit. Jangka waktu pembayaran dihitung sejak dokumen penagihan dinyatakan lengkap, benar, dan diterima.",
+  "p": 19
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-XII",
+  "t": "XII. SANKSI",
+  "x": "Terdapat lima bentuk sanksi: pengurangan pembayaran, service credit, atau denda bila SLA tidak tercapai; perintah perbaikan atau teguran tertulis; pemotongan pembayaran untuk pekerjaan yang tidak dilaksanakan atau tidak sesuai; pemutusan kontrak untuk pelanggaran material; dan tuntutan ganti rugi atas kelalaian atau wanprestasi. Tata cara pengenaan, besaran denda, dan pemutusan kontrak diatur lebih lanjut dalam kontrak.",
+  "p": 20
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-XIII",
+  "t": "XIII. KEAMANAN, KESEHATAN, KESELAMATAN KERJA DAN LINGKUNGAN (K3L)",
+  "x": "Penyedia wajib menerapkan K3L sesuai peraturan, ketentuan IAS, dan standar keselamatan bandar udara pada setiap tahap pekerjaan, mulai dari personel yang kompeten, peralatan kerja yang aman, APD, pengendalian risiko, hingga keselamatan radiasi dan kelistrikan. Risiko, kerugian, atau tuntutan akibat kelalaian dan ketidakpatuhan terhadap K3L menjadi tanggung jawab penyedia. Seluruh personel juga harus mematuhi ketentuan keamanan bandar udara dan persyaratan akses area terbatas.",
+  "p": 21
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-XIV",
+  "t": "XIV. PERSYARATAN PENYAMPAIAN KAJIAN MANAJEMEN RISIKO OLEH PENYEDIA",
+  "x": "Penyedia menyampaikan Kajian Manajemen Risiko yang memuat identifikasi risiko, langkah mitigasi, dan rencana pengendalian. Kajian ini diserahkan sebelum pekerjaan dimulai dan diperbarui jika terdapat perubahan yang berdampak pada pelaksanaan pekerjaan.",
+  "p": 21
+ },
+ {
+  "lvl": "bab",
+  "id": "kak-XV",
+  "t": "XV. LAIN-LAIN",
+  "x": "Terdapat enam ketentuan. Seluruh dokumen, data, dan hasil pekerjaan menjadi milik IAS dan tidak boleh digunakan atau diberikan kepada pihak lain tanpa persetujuan tertulis. Penyedia menjaga kerahasiaan informasi, termasuk setelah kontrak berakhir. Pekerjaan yang belum diatur tetapi diperlukan secara teknis harus lebih dahulu mendapat persetujuan tertulis IAS. Penyedia mematuhi kebijakan, prosedur, dan ketentuan keamanan serta keselamatan di lingkungan IAS dan lokasi kerja. Hal yang belum diatur ditetapkan dalam kontrak atau dokumen lain. Bila ada perubahan kebijakan atau regulasi, penyedia menyesuaikan setelah terdapat persetujuan atau instruksi IAS.",
+  "p": 21
+ }
+] }
+};
+function renderRingkasan(key){
+    const cfg = RINGKASAN[key];
+    const box = document.getElementById(cfg.listId);
+    if(!box) return;
+    let html = '';
+    cfg.items.forEach(it=>{
+        html += '<div class="sum-item sum-'+it.lvl+'" data-page="'+it.p+'" id="s-'+it.id+'">'
+              + '<div class="sum-title">'+it.t+'</div>'
+              + (it.x ? '<p class="sum-text">'+it.x+'</p>' : '')
+              + '</div>';
+    });
+    box.innerHTML = html;
+    box.addEventListener('click', e=>{
+        const el = e.target.closest('.sum-item');
+        if(!el) return;
+        box.querySelectorAll('.sum-item.current').forEach(n=>n.classList.remove('current'));
+        el.classList.add('current');
+        const frame = document.getElementById(cfg.frameId);
+        if(frame && frame.dataset.loaded === 'true') frame.src = cfg.file + '#page=' + el.dataset.page;
+    });
+}
+renderRingkasan('ikp');
+renderRingkasan('kak');
+
+// Efek stagger juga dipicu pas halaman pertama kali dibuka
+staggerActivePage();
+
+
+// Tema awal: Putih (mode gelap = Hitam)
+applyThemeFromAccent('#ffffff', document.querySelector('.theme-swatch.swatch-white'));
+</script>
+</body>
+</html>
